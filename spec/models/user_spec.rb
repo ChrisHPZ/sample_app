@@ -14,9 +14,15 @@ describe User do
   it { should respond_to(:password_digest) }
   it { should respond_to(:password) }
   it { should respond_to(:password_confirmation) }
+  it { should respond_to(:remember_token) }
   it { should respond_to(:authenticate) }
   
   it { should be_valid }
+  
+  describe remember_token do
+    before { @user.save }
+    its(:remember_token) { should_not be_blank }
+  end
   
   describe "when name is not present" do
     before { @user.name = " " }
@@ -56,7 +62,7 @@ describe User do
   
   describe "when password is not present" do
     before do
-      @user = User.new(mame: "Example User", email: "user@example.com", password: " ", password_confirmation: " ")
+      @user = User.new(name: "Example User", email: "user@example.com", password: " ", password_confirmation: " ")
     end
     it { should_not be_valid }
   end
@@ -68,7 +74,7 @@ describe User do
   
   describe "when email format is invalid" do
     it "should be invalid" do
-      addresses = %w[user@foo,com user_at_foo.org example.user@foo.foo@bar_baz.com foo@bar+baz.com]
+      address = %w[user@foo,com user_at_foo.org example.user@foo.foo@bar_baz.com foo@bar+baz.com]
       address.each do |invalid_address|
         @user.email = invalid_address
         expect(@user).not_to be_valid
@@ -89,39 +95,10 @@ describe User do
   describe "when email address is already taken" do
     before do
       user_with_same_email = @user.dup
-      user_with_same_email = @user.email.upcase
+      user_with_same_email.email = @user.email.upcase
       user_with_same_email.save
     end
     
     it { should_not be_valid}
   end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
